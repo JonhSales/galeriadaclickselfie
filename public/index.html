@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GALERIA DA CLICK</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="content">
+        <form id="upload-form" action="/upload" method="POST" enctype="multipart/form-data" style="display: none;">
+            <input id="file-input" type="file" name="photos" multiple>
+            <button id="choose-button" type="button">Escolha o momento</button>
+            <ul id="file-list"></ul>
+            <button id="upload-button" type="submit" style="display: none;">Compartilhe</button>
+        </form>
+    </div>
+    <button id="share-button">Compartilhe Momentos</button>
+    <footer>
+        <p>Todos os direitos reservados &copy; 2024 <a href="https://www.instagram.com/clickselfieoficial" target="_blank">Click Selfie</a></p>
+    </footer>
+    <script>
+        // Mostrar o formulário ao clicar no botão 'Compartilhe Momentos'
+        document.getElementById('share-button').onclick = function() {
+            document.getElementById('upload-form').style.display = 'block';
+            document.getElementById('share-button').style.display = 'none';
+            document.getElementById('choose-button').style.display = 'block';
+        };
+
+        // Abrir o seletor de arquivos ao clicar no botão 'Escolha o momento'
+        document.getElementById('choose-button').onclick = function() {
+            document.getElementById('file-input').click();
+        };
+
+        // Atualizar a lista de arquivos selecionados após o usuário escolher os arquivos
+        document.getElementById('file-input').onchange = function() {
+            const fileList = document.getElementById('file-list');
+            fileList.innerHTML = ''; // Limpar a lista antes de adicionar novos arquivos
+
+            // Exibir a lista de arquivos e o botão de envio somente se houver arquivos selecionados
+            if (this.files.length > 0) {
+                document.getElementById('upload-button').style.display = 'block';
+                for (let i = 0; i < this.files.length; i++) {
+                    const li = document.createElement('li');
+                    li.textContent = this.files[i].name;
+                    fileList.appendChild(li);
+                }
+            } else {
+                document.getElementById('upload-button').style.display = 'none';
+            }
+        };
+
+        // Manipular o envio do formulário e exibir uma mensagem de sucesso
+        document.getElementById('upload-form').onsubmit = async function(event) {
+    event.preventDefault(); // Impedir o envio automático do formulário
+
+    // Verificar se há arquivos selecionados antes de enviar
+    if (document.getElementById('file-input').files.length === 0) {
+        alert("Por favor, selecione pelo menos um arquivo.");
+        return; // Não prosseguir com o envio
+    }
+
+    const formData = new FormData(this);
+
+    try {
+        const response = await fetch('/upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro na resposta do servidor: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+        alert(result.message);
+    } catch (error) {
+        console.error('Erro no upload:', error);
+        alert(`Ocorreu um erro ao tentar enviar o arquivo: ${error.message}`);
+    }
+};
+    </script>
+</body>
+</html>
